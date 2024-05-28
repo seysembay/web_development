@@ -13,6 +13,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['name'] = f"{user.last_name} {user.first_name}"
         token['isAdmin'] = user.is_superuser
         token['role'] = user.role.name
+        token['email'] = user.email
         return token
 
 

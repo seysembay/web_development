@@ -4,6 +4,7 @@ from User.models import CustomUser
 
 
 class Course(models.Model):
+    DoesNotExist = None
     DURATION_UNIT_CHOICES = (
         ('weeks', 'недель'),
         ('months', 'месяцев'),
@@ -26,7 +27,7 @@ class CourseRun(models.Model):
     end_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return self.course.name
+        return f"{self.course.name} ({self.id})"
 
 
 class Lesson(models.Model):
@@ -47,7 +48,26 @@ class Enrollment(models.Model):
 
 
 class Homework(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    lesson = models.OneToOneField(Lesson, related_name='homeworks', on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     description = models.TextField()
     due_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.title
+
+
+class HomeworkSubmission(models.Model):
+    STATUS_CHOICES = [
+        ('submitted', 'Отправлен на проверку'),
+        ('returned', 'Возвращен на доработку'),
+        ('approved', 'Принят')
+    ]
+    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    homework = models.ForeignKey(Homework, on_delete=models.CASCADE)
+    submission_date = models.DateTimeField(default=timezone.now)
+    content = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
+
+    def __str__(self):
+        return self.homework.title
